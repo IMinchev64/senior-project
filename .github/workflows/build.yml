@@ -18,3 +18,6 @@ jobs:
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
+    - name: Run tests
+      run: mvn surefire:test --file pom.xml
