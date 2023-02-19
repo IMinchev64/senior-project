@@ -15,7 +15,7 @@ import static edu.aubg.ics.util.Constants.*;
 @Component
 public class ImaggaConnector implements Connector {
     @Override
-    public void connect(String imageUrl) throws IOException {
+    public String connect(String imageUrl) throws IOException {
         String credentialsToEncode = String.format("%s:%s", IMAGGA_API_KEY, IMAGGA_API_SECRET);
         String basicAuth = Base64.getEncoder().encodeToString(credentialsToEncode.getBytes(StandardCharsets.UTF_8));
 
@@ -36,6 +36,6 @@ public class ImaggaConnector implements Connector {
 
         connectionInput.close();
 
-        System.out.println(jsonResponse);
+        return jsonResponse;
     }
 }
