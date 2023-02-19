@@ -19,8 +19,21 @@
 
 	<repositories>
 		<repository>
+			<id>osgeo</id>
+			<name>OSGeo Release Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+		</repository>
+		<repository>
 			<id>geotoolkit</id>
 			<url>http://maven.geotoolkit.org/</url>
+		</repository>
+		<repository>
+			<id>geomajas</id>
+			<url>http://maven.geomajas.org</url>
+		</repository>
+		<repository>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2</url>
 		</repository>
 	</repositories>
 
