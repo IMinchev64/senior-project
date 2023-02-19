@@ -19,9 +19,8 @@
 
 	<repositories>
 		<repository>
-			<id>jai.net</id>
-			<name>jai.net Repository</name>
-			<url>https://raw.github.com/haraldk/TwelveMonkeys/repository/</url>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2</url>
 		</repository>
 	</repositories>
 
