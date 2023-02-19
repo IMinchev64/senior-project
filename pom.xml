@@ -19,8 +19,8 @@
 
 	<repositories>
 		<repository>
-			<id>geomajas</id>
-			<url>http://maven.geomajas.org</url>
+			<id>geotoolkit</id>
+			<url>http://maven.geotoolkit.org/</url>
 		</repository>
 	</repositories>
 
