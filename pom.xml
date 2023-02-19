@@ -20,10 +20,6 @@
 	<repositories>
 		<repository>
 			<id>jai.net</id>
-			<url>https://jai.dev.java.net/binary-builds.html</url>
-		</repository>
-		<repository>
-			<id>jai.net</id>
 			<name>jai.net Repository</name>
 			<url>https://raw.github.com/haraldk/TwelveMonkeys/repository/</url>
 		</repository>
