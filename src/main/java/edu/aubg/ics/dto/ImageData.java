@@ -1,9 +1,11 @@
 package edu.aubg.ics.dto;
 
 import edu.aubg.ics.util.ChecksumCalculator;
+import edu.aubg.ics.util.ImageDimensions;
 import org.json.JSONArray;
 
 import java.awt.*;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
@@ -15,49 +17,37 @@ public class ImageData {
     private int height;
     private JSONArray tags;
 
-    public ImageData(String url, JSONArray tags) throws NoSuchAlgorithmException {
+    public ImageData(String url, JSONArray tags) throws NoSuchAlgorithmException, IOException {
         this.url = url;
         this.tags = tags;
         this.checksum = calculateChecksum(url);
+
+        setDimensions();
     }
 
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getChecksum() {
         return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     public JSONArray getTags() {
         return tags;
     }
 
-    public void setTags(JSONArray tags) {
-        this.tags = tags;
-    }
-
     public int getWidth() {
         return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
     }
 
     public int getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
-        this.height = height;
+    private void setDimensions() throws IOException {
+        ImageDimensions imageDimensions = new ImageDimensions(this.url);
+        this.width = imageDimensions.getWidth();
+        this.height = imageDimensions.getHeight();
     }
 }

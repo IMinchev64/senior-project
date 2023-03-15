@@ -17,4 +17,8 @@ public class PostgresDAO {
     public void close() throws SQLException {
         connection.close();
     }
+
+    public Connection getConnection() {
+        return connection;
+    }
 }
