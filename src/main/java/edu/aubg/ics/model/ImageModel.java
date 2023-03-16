@@ -4,10 +4,8 @@ import edu.aubg.ics.api.Connector;
 import edu.aubg.ics.dao.ImageDAO;
 import edu.aubg.ics.dao.PostgresDAO;
 import edu.aubg.ics.dto.ImageData;
-import edu.aubg.ics.util.ImageDimensions;
 import edu.aubg.ics.util.ResponseParser;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +13,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
 
 @Service
 public class ImageModel {
@@ -25,39 +25,52 @@ public class ImageModel {
     @Autowired
     private ImageDAO imageDAO;
 
-    private Connector imaggaConnector;
-
-    private String jsonResponse;
-    private JSONArray tags;
-    private ResponseParser responseParser = new ResponseParser();
-
-    ImageData imageData;
+    private final Connector imaggaConnector;
+    private final ResponseParser responseParser = new ResponseParser();
+    private ImageData imageData;
 
     public ImageModel(Connector imaggaConnector) {
         this.imaggaConnector = imaggaConnector;
     }
 
-    public void insert(String imageURL) throws IOException, NoSuchAlgorithmException, SQLException {
-        jsonResponse = imaggaConnector.connect(imageURL);
-        tags = responseParser.jsonParser(jsonResponse);
-        imageData = new ImageData(imageURL, tags);
+    public void processImage(String imageURL, boolean noCache) throws NoSuchAlgorithmException, SQLException {
 
-        insertIntoDB();
-    }
+        String checksum = calculateChecksum(imageURL);
 
-    private void insertIntoDB() throws SQLException {
-        Connection connection = null;
+        if(!noCache && checkExisting(checksum)) {
+            System.out.println("Image already exists");
+            return;
+        }
+
         try {
+            Connection connection;
+            String jsonResponse = imaggaConnector.connect(imageURL);
+            JSONArray tags = responseParser.jsonParser(jsonResponse);
+            imageData = new ImageData(imageURL, tags);
+
             connection = postgresDAO.getConnection();
             imageDAO.setConnection(connection);
 
-            imageDAO.insertImage(imageData);
-            imageDAO.insertTags(imageData);
-            imageDAO.insertImageToTags(imageData);
+            if (!noCache) {
+                insertImage();
+            }
+            else {
+                updateImage();
+            }
+            System.out.println("Image inserted");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Failed to connect to Imagga API");
         } finally {
+            fetchImage(checksum);
             postgresDAO.close();
             System.out.println("Operation successfull!");
         }
+
+    }
+
+    private void insertImage() throws SQLException {
+        imageDAO.insertToDatabase(imageData);
     }
 
     private void printInfo() {
@@ -69,4 +82,15 @@ public class ImageModel {
                 imageData.getTags().toString(4)));
     }
 
+    private boolean checkExisting(String checksum) {
+        return imageDAO.imageExists(checksum);
+    }
+
+    private void fetchImage(String checksum) throws SQLException {
+        imageDAO.fetchImage(checksum);
+    }
+
+    private void updateImage() throws SQLException {
+        imageDAO.updateImageData(imageData);
+    }
 }

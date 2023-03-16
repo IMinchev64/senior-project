@@ -17,7 +17,79 @@ public class ImageDAO {
         this.connection = connection;
     }
 
-    public void insertImage(ImageData imageData) throws SQLException{
+    public void insertToDatabase(ImageData imageData) throws SQLException {
+        insertImage(imageData);
+        insertTags(imageData);
+        insertImageToTags(imageData);
+    }
+
+    public boolean imageExists(String checksum) {
+        try {
+            String checkQuery = "SELECT COUNT(*) FROM images WHERE checksum = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(checkQuery);
+            preparedStatement.setString(1, checksum);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            int count = resultSet.getInt(1);
+            return count > 0;
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void updateImageData(ImageData imageData) throws  SQLException {
+        int imageId = getImageIdByChecksum(imageData.getChecksum());
+            if (imageId != -1) {
+                deleteImageTagsByImageId(imageId);
+                deleteImageById(imageId);
+            }
+            insertToDatabase(imageData);
+    }
+
+    public ImageData fetchImage(String checksum) throws SQLException {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = connection.prepareStatement("SELECT * FROM images WHERE checksum = ?");
+            preparedStatement.setString(1, checksum);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String url = resultSet.getString("url");
+                String uploadedAt = resultSet.getString("uploaded_at");
+                int width = resultSet.getInt("width");
+                int height = resultSet.getInt("height");
+                Map<String, Double> tagMap = new HashMap<>();
+
+                String sql = "SELECT * FROM tags INNER JOIN image_tags ON tags.id = image_tags.tag_id WHERE image_tags.image_id = ?";
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setInt(1, resultSet.getInt("id"));
+                ResultSet tagResultSet = preparedStatement.executeQuery();
+
+                while (tagResultSet.next()) {
+                    String tag = tagResultSet.getString("label");
+                    Double accuracy = tagResultSet.getDouble("accuracy");
+                    tagMap.put(tag, accuracy);
+                }
+
+                return new ImageData(url, uploadedAt, width, height, tagMap);
+            }
+
+        } finally {
+            try {
+                resultSet.close();
+            } catch (Exception e) {}
+            try {
+                preparedStatement.close();
+            } catch (Exception e) {}
+        }
+
+        return null;
+    }
+
+    private void insertImage(ImageData imageData) throws SQLException{
         String sql = "INSERT INTO images (url, width, height, checksum) VALUES (?, ?, ?, ?)";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -29,7 +101,7 @@ public class ImageDAO {
             }
     }
 
-    public void insertTags(ImageData imageData) throws SQLException {
+    private void insertTags(ImageData imageData) throws SQLException {
         String sql = "INSERT INTO tags (label) VALUES (?) ON CONFLICT DO NOTHING";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -42,7 +114,7 @@ public class ImageDAO {
         }
     }
 
-    public void insertImageToTags(ImageData imageData) throws SQLException {
+    private void insertImageToTags(ImageData imageData) throws SQLException {
         int imageID;
         Map<String, Double> tagIDs = new HashMap<>();
 
@@ -84,8 +156,39 @@ public class ImageDAO {
                 preparedStatement.executeUpdate();
             }
         }
+    }
 
+    private int getImageIdByChecksum(String checksum) throws SQLException {
+        String sql = "SELECT id FROM images WHERE checksum = ?";
 
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, checksum);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+            else {
+                return -1;
+            }
+        }
+    }
+
+    private void deleteImageTagsByImageId(int imageId) throws SQLException {
+        String sql = "DELETE FROM image_tags WHERE image_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, imageId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void deleteImageById(int imageId) throws  SQLException {
+        String sql = "DELETE FROM images WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, imageId);
+            preparedStatement.executeUpdate();
+        }
     }
 }
 

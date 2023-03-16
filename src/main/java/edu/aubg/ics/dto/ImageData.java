@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import java.awt.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
 
@@ -16,6 +17,8 @@ public class ImageData {
     private int width;
     private int height;
     private JSONArray tags;
+    private String uploadedAt;
+    private Map<String, Double> tagMap;
 
     public ImageData(String url, JSONArray tags) throws NoSuchAlgorithmException, IOException {
         this.url = url;
@@ -23,6 +26,14 @@ public class ImageData {
         this.checksum = calculateChecksum(url);
 
         setDimensions();
+    }
+
+    public ImageData(String url, String uploadedAt, int width, int height, Map<String, Double> tagMap) {
+        this.url = url;
+        this.uploadedAt = uploadedAt;
+        this.width = width;
+        this.height = height;
+        this.tagMap = tagMap;
     }
 
     public String getUrl() {

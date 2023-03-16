@@ -20,8 +20,8 @@ public class ImageController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<String> getImageTags(@RequestParam String imageURL) throws IOException, NoSuchAlgorithmException, SQLException {
-        imageModel.insert(imageURL);
+    public ResponseEntity<String> getImageTags(@RequestParam String imageURL, @RequestParam(required = false, defaultValue = "false") boolean noCache) throws NoSuchAlgorithmException, SQLException {
+        imageModel.processImage(imageURL, noCache);
         return ResponseEntity.ok("Request submitted");
     }
 }
