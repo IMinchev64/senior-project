@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -36,6 +37,10 @@ public class ImageModel {
     public void processImage(String imageURL, boolean noCache) throws NoSuchAlgorithmException, SQLException {
 
         String checksum = calculateChecksum(imageURL);
+        Connection connection;
+
+        connection = postgresDAO.newConnection();
+        imageDAO.setConnection(connection);
 
         if(!noCache && checkExisting(checksum)) {
             System.out.println("Image already exists");
@@ -43,13 +48,10 @@ public class ImageModel {
         }
 
         try {
-            Connection connection;
+
             String jsonResponse = imaggaConnector.connect(imageURL);
             JSONArray tags = responseParser.jsonParser(jsonResponse);
             imageData = new ImageData(imageURL, tags);
-
-            connection = postgresDAO.getConnection();
-            imageDAO.setConnection(connection);
 
             if (!noCache) {
                 insertImage();
@@ -62,11 +64,38 @@ public class ImageModel {
             e.printStackTrace();
             System.out.println("Failed to connect to Imagga API");
         } finally {
-            fetchImage(checksum);
             postgresDAO.close();
             System.out.println("Operation successfull!");
         }
 
+    }
+
+    public ImageData getImageData(String checksum) throws SQLException {
+        Connection connection;
+        try {
+            connection = postgresDAO.newConnection();
+            imageDAO.setConnection(connection);
+
+            imageData = fetchImage(checksum);
+        } finally {
+            postgresDAO.close();
+        }
+
+        return imageData;
+    }
+
+    public List getAllImages() throws SQLException {
+        Connection connection;
+
+        try {
+            connection = postgresDAO.newConnection();
+            imageDAO.setConnection(connection);
+
+            List<ImageData> images = imageDAO.getAllImages();
+            return images;
+        } finally {
+            postgresDAO.close();
+        }
     }
 
     private void insertImage() throws SQLException {
@@ -86,11 +115,13 @@ public class ImageModel {
         return imageDAO.imageExists(checksum);
     }
 
-    private void fetchImage(String checksum) throws SQLException {
-        imageDAO.fetchImage(checksum);
+    private ImageData fetchImage(String checksum) throws SQLException {
+        return imageDAO.fetchImage(checksum);
     }
 
     private void updateImage() throws SQLException {
         imageDAO.updateImageData(imageData);
     }
+
+
 }

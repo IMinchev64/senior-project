@@ -21,4 +21,8 @@ public class PostgresDAO {
     public Connection getConnection() {
         return connection;
     }
+
+    public Connection newConnection() throws SQLException {
+        return DriverManager.getConnection(POSTGRES_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
+    }
 }

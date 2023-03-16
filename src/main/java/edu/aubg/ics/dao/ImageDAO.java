@@ -7,7 +7,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ImageDAO {
@@ -61,18 +63,9 @@ public class ImageDAO {
                 String uploadedAt = resultSet.getString("uploaded_at");
                 int width = resultSet.getInt("width");
                 int height = resultSet.getInt("height");
-                Map<String, Double> tagMap = new HashMap<>();
+                int id = resultSet.getInt("id");
 
-                String sql = "SELECT * FROM tags INNER JOIN image_tags ON tags.id = image_tags.tag_id WHERE image_tags.image_id = ?";
-                preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setInt(1, resultSet.getInt("id"));
-                ResultSet tagResultSet = preparedStatement.executeQuery();
-
-                while (tagResultSet.next()) {
-                    String tag = tagResultSet.getString("label");
-                    Double accuracy = tagResultSet.getDouble("accuracy");
-                    tagMap.put(tag, accuracy);
-                }
+                Map<String, Double> tagMap = getTagMap(id);
 
                 return new ImageData(url, uploadedAt, width, height, tagMap);
             }
@@ -87,6 +80,58 @@ public class ImageDAO {
         }
 
         return null;
+    }
+
+    public List<ImageData> getAllImages() throws SQLException{
+        List<ImageData> images = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            String sql = "SELECT * FROM images";
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String url = resultSet.getString("url");
+                String uploadedAt = resultSet.getString("uploaded_at");
+                int width = resultSet.getInt("width");
+                int height = resultSet.getInt("height");
+                int id = resultSet.getInt("id");
+
+                Map<String, Double> tagMap = getTagMap(id);
+
+                ImageData imageData = new ImageData(url, uploadedAt, width, height, tagMap);
+                images.add(imageData);
+            }
+        } finally {
+            try {
+                resultSet.close();
+            } catch (Exception e) {}
+            try {
+                preparedStatement.close();
+            } catch (Exception e) {}
+        }
+
+        return images;
+    }
+
+    private Map<String, Double> getTagMap(int id) throws SQLException {
+        PreparedStatement preparedStatement = null;
+        Map<String, Double> tagMap = new HashMap<>();
+
+        String sql = "SELECT * FROM tags INNER JOIN image_tags ON tags.id = image_tags.tag_id WHERE image_tags.image_id = ?";
+        preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, id);
+        ResultSet tagResultSet = preparedStatement.executeQuery();
+
+        while (tagResultSet.next()) {
+            String tag = tagResultSet.getString("label");
+            Double accuracy = tagResultSet.getDouble("accuracy");
+            tagMap.put(tag, accuracy);
+        }
+
+        return tagMap;
     }
 
     private void insertImage(ImageData imageData) throws SQLException{
@@ -190,5 +235,7 @@ public class ImageDAO {
             preparedStatement.executeUpdate();
         }
     }
+
+
 }
 
