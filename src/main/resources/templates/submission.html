@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Submission Page</title>
+    <link th:href="@{/styles/submission.css}" rel="stylesheet" />
+</head>
+<body>
+<header>
+    <h1>Image Submission Page</h1>
+</header>
+<nav>
+    <ul>
+        <li><a href="/images">Gallery</a></li>
+    </ul>
+</nav>
+<div id="content">
+    <form action='# 'th:action="@{/}" th:object="${imageData}" method="post">
+        <label for="url">Image URL:</label>
+        <input type="text" id="url" name="url" required th:field="*{url}">
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    <div th:if="${error}" class="error">
+        <p th:text="${error}"></p>
+    </div>
+</div>
+</body>
+</html>

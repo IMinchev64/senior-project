@@ -235,7 +235,5 @@ public class ImageDAO {
             preparedStatement.executeUpdate();
         }
     }
-
-
 }
 

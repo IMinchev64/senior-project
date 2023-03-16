@@ -122,6 +122,4 @@ public class ImageModel {
     private void updateImage() throws SQLException {
         imageDAO.updateImageData(imageData);
     }
-
-
 }

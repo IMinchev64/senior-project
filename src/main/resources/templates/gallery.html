@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gallery</title>
+    <link th:href="@{/styles/gallery.css}" rel="stylesheet" />
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Submit Image</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Gallery</h1>
+        <div class="gallery">
+            <a href="/images/{imageId}">
+                <div class="gallery-item">
+                    <img src="{imageUrl}" alt="{imageAlt}">
+                    <div class="overlay">
+                        <div class="text">{imageTitle}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -29,6 +29,8 @@ public class ImageData {
     @JsonProperty("tags")
     private Map<String, Double> tagMap;
 
+    public ImageData() {}
+
     public ImageData(String url, JSONArray tags) throws NoSuchAlgorithmException, IOException {
         this.url = url;
         this.tags = tags;
