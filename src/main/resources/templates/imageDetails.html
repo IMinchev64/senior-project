@@ -18,20 +18,22 @@
     <div class="container">
         <h1>Image Details</h1>
         <div class="image-info">
-            <img src="${imageData.url}" alt="Image">
+            <img th:src="${imageData.getUrl()}" alt="Image">
             <ul>
-                <li>Checksum: ${imageData.checksum}</li>
-                <li>Width: ${imageData.width}px</li>
-                <li>Height: ${imageData.height}px</li>
-                <li>Uploaded At: ${imageData.uploadedAt}</li>
+                <li>URL: [[${imageData.getUrl()}]]</li>
+                <li>Width: [[${imageData.getWidth()}]]px</li>
+                <li>Height: [[${imageData.getHeight()}]]px</li>
+                <li>Uploaded at: [[${imageData.getUploadedAt()}]]</li>
             </ul>
         </div>
         <h2>Tags</h2>
         <div class="tags">
             <ul>
-                <#list imageData.tagMap?keys as tag>
-                    <li>${tag}: ${imageData.tagMap[tag]}%</li>
-                </#list>
+                <li th:each="tag : ${imageData.getTagMap()}">
+                    <span th:text="${tag.key}"></span>:
+                    <span th:text="${#numbers.formatDecimal(
+                    tag.value, 2, 2)}"></span>%
+                </li>
             </ul>
         </div>
     </div>

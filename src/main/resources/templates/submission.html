@@ -15,7 +15,7 @@
     </ul>
 </nav>
 <div id="content">
-    <form action='# 'th:action="@{/}" th:object="${imageData}" method="post">
+    <form action='#' th:action="@{/}" th:object="${imageData}" method="post">
         <label for="url">Image URL:</label>
         <input type="text" id="url" name="url" required th:field="*{url}">
         <br>
