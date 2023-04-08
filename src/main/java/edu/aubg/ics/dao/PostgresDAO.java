@@ -11,7 +11,7 @@ public class PostgresDAO {
     private Connection connection;
 
     public PostgresDAO() throws SQLException {
-        this.connection = DriverManager.getConnection(POSTGRES_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
+        this.connection = DriverManager.getConnection(POSTGRES_ICS_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
     }
 
     public void close() throws SQLException {
@@ -23,6 +23,6 @@ public class PostgresDAO {
     }
 
     public Connection newConnection() throws SQLException {
-        return DriverManager.getConnection(POSTGRES_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
+        return DriverManager.getConnection(POSTGRES_ICS_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
     }
 }

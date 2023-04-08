@@ -67,7 +67,7 @@ public class ImageDAO {
 
                 Map<String, Double> tagMap = getTagMap(id);
 
-                return new ImageData(url, uploadedAt, width, height, tagMap);
+                return new ImageData(checksum, url, uploadedAt, width, height, tagMap);
             }
 
         } finally {
@@ -93,6 +93,7 @@ public class ImageDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+                String checksum = resultSet.getString("checksum");
                 String url = resultSet.getString("url");
                 String uploadedAt = resultSet.getString("uploaded_at");
                 int width = resultSet.getInt("width");
@@ -101,7 +102,7 @@ public class ImageDAO {
 
                 Map<String, Double> tagMap = getTagMap(id);
 
-                ImageData imageData = new ImageData(url, uploadedAt, width, height, tagMap);
+                ImageData imageData = new ImageData(checksum, url, uploadedAt, width, height, tagMap);
                 images.add(imageData);
             }
         } finally {

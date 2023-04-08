@@ -39,7 +39,8 @@ public class ImageData {
         setDimensions();
     }
 
-    public ImageData(String url, String uploadedAt, int width, int height, Map<String, Double> tagMap) {
+    public ImageData(String checksum, String url, String uploadedAt, int width, int height, Map<String, Double> tagMap) {
+        this.checksum = checksum;
         this.url = url;
         this.uploadedAt = uploadedAt;
         this.width = width;

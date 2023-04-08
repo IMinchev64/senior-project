@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,23 +7,26 @@
     <link th:href="@{/styles/gallery.css}" rel="stylesheet" />
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="/">Submit Image</a></li>
-        </ul>
-    </nav>
-    <div class="container">
-        <h1>Gallery</h1>
-        <div class="gallery">
-            <a href="/images/{imageId}">
+<nav>
+    <ul>
+        <li><a href="/">Submit Image</a></li>
+    </ul>
+</nav>
+<div class="container">
+    <h1>Gallery</h1>
+    <div class="gallery">
+        <!-- Iterate over each image data and display its corresponding information -->
+        <div th:each="imageData : ${images}">
+            <a th:href="@{/images/{checksum}(checksum=${imageData.getChecksum()})}">
                 <div class="gallery-item">
-                    <img src="{imageUrl}" alt="{imageAlt}">
+                    <img th:src="${imageData.getUrl()}" th:alt="Image">
                     <div class="overlay">
-                        <div class="text">{imageTitle}</div>
+                        <div class="text" th:text="'View Image Information'"></div>
                     </div>
                 </div>
             </a>
         </div>
     </div>
+</div>
 </body>
 </html>
