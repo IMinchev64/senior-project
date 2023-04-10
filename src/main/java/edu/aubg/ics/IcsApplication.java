@@ -31,39 +31,45 @@ public class IcsApplication {
 
 		ImageFeatureExtractor extractor = new ImageFeatureExtractor(imageWidth, imageHeight, normalizationFactors);
 
-//		ImageFeatureDatabaseInserter imageFeatureDatabaseInserter = new ImageFeatureDatabaseInserter(imageFeatureExtractor);
-//
-//		imageFeatureDatabaseInserter.insertFeatures();
-
-		List<float[]> featureVectors = new ArrayList<>();
 		String folderPath = COCO_TRAIN_IMAGES_PATH;
 		File folder = new File(folderPath);
 		File[] listOfFiles = folder.listFiles();
 
-		int numImages = 10000;
-		int processedImages = 0;
-		for (File file : listOfFiles) {
-			if (file.isFile() && isImageFile(file)) {
-				try {
-					BufferedImage image = ImageIO.read(file);
-					float[] featureVector = extractor.extractFeatures(image);
-					featureVectors.add(featureVector);
-					System.out.println("Processed image: " + file.getName());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				processedImages++;
-				if (processedImages >= numImages) {
-					break;
-				}
-			}
-		}
+		int numImages = 24000;
+		int batchSize = 500;
+		int numBatches = numImages / batchSize;
 
-		FeatureDimensionalityReducer featureDimensionalityReducer = new FeatureDimensionalityReducer(100, featureVectors);
-//		float[] reducedFeatures = featureDimensionalityReducer.reduce(featureVectors.get(0));
-//		System.out.println("Feature vectors: " + Arrays.toString(featureVectors.get(0)));
-//		System.out.println("\n");
-//		System.out.println("Reduced feature vectors: " + Arrays.toString(reducedFeatures));
+		FeatureDimensionalityReducer reducer = new FeatureDimensionalityReducer(100, 0.001);
+
+//		for (int batch = 0; batch < numBatches; batch++) {
+//			List<float[]> batchFeatureVectors = new ArrayList<>();
+//
+//			for (int i = 0; i < batchSize; i++) {
+//				File file = listOfFiles[batch * batchSize + i];
+//				if (file.isFile() && isImageFile(file)) {
+//					try {
+//						BufferedImage image = ImageIO.read(file);
+//						float[] featureVector = extractor.extractFeatures(image);
+//						batchFeatureVectors.add(featureVector);
+//						System.out.println("Processed image: " + file.getName());
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//			System.out.println("Current batch is: " + (batch+1));
+//			System.out.println("Batches remaining: " + (numBatches-batch-1));
+//			reducer.partialFit(batchFeatureVectors);
+//		}
+//
+//		reducer.savePrincipleComponents();
+
+		BufferedImage image = ImageIO.read(new File(String.format("%s/%s", folderPath, "000000000009.jpg")));
+		float[] features = extractor.extractFeatures(image);
+		float[] reducedFeatures = reducer.reduceFeatureVector(features);
+		System.out.println("Feature vectors: " + Arrays.toString(features));
+		System.out.println("\n");
+		System.out.println("Reduced feature vectors: " + Arrays.toString(reducedFeatures));
 
 	}
 

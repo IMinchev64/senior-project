@@ -1,71 +1,109 @@
 package edu.aubg.ics.knn;
 
-import org.apache.commons.math3.linear.*;
-import org.apache.commons.math3.stat.correlation.Covariance;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.List;
 
 public class FeatureDimensionalityReducer {
     private final int targetDimensions;
-    private RealMatrix transformationMatrix;
+    private RealMatrix principalComponents;
+    private double learningRate;
 
-    public FeatureDimensionalityReducer(int targetDimensions, List<float[]> data) {
+    public FeatureDimensionalityReducer(int targetDimensions, double learningRate) {
         this.targetDimensions = targetDimensions;
-        computeTransformationMatrix(data);
+        this.learningRate = learningRate;
     }
 
-    public float[] reduce(float[] featureVector) {
-        double[] doubleFeatureVector = new double[featureVector.length];
-        for (int i = 0; i < featureVector.length; i++) {
-            doubleFeatureVector[i] = featureVector[i];
-        }
-
-        RealMatrix principalComponents = loadPrincipalComponents("PrincipalComponents");
-        RealMatrix featureMatrix = new Array2DRowRealMatrix(new double[][] {doubleFeatureVector});
-        RealMatrix transposedPrincipalComponents = principalComponents.transpose();
-        RealMatrix reducedMatrix = featureMatrix.multiply(transposedPrincipalComponents);
-
-        double[] reducedData = reducedMatrix.getRow(0);
-        float[] reducedFeatureVector = new float[reducedData.length];
-        for (int i = 0; i < reducedData.length; i++) {
-            reducedFeatureVector[i] = (float) reducedData[i];
-        }
-        return reducedFeatureVector;
+    public float[] reduceFeatureVector(float[] featureVector) {
+        loadPrincipalComponents();
+        RealVector inputVector = MatrixUtils.createRealVector(toDoubleArray(featureVector));
+        RealVector reducedVector = principalComponents.transpose().operate(inputVector);
+        return toFloatArray(reducedVector.toArray());
     }
 
-    private RealMatrix loadPrincipalComponents(String fileName) {
-        RealMatrix principleComponents = null;
-        try (FileInputStream fis = new FileInputStream(fileName);
-        ObjectInputStream ois = new ObjectInputStream(fis)) {
-            principleComponents = (RealMatrix) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+    public void partialFit(List<float[]> data) {
+        RealMatrix dataMatrix = convertToRealMatrix(data);
+
+        if (principalComponents == null) {
+            principalComponents = initializePrincipleComponents(dataMatrix.getColumnDimension(), targetDimensions);
         }
-        return principleComponents;
+
+        double epsilon = 1e-8;
+
+        for (int i = 0; i < dataMatrix.getRowDimension(); i++) {
+            RealVector x = dataMatrix.getRowVector(i);
+            for (int j = 0; j < principalComponents.getColumnDimension(); j++) {
+                RealVector w = principalComponents.getColumnVector(j);
+                double dotProduct = w.dotProduct(x);
+                RealVector deltaW = x.mapMultiply(dotProduct).subtract(w.mapMultiply(dotProduct * dotProduct + epsilon)).mapMultiply(learningRate);
+                w = w.add(deltaW);
+                w = w.unitVector();
+                principalComponents.setColumnVector(j, w);
+            }
+        }
+        savePrincipleComponents();
     }
 
-    private void computeTransformationMatrix(List<float[]> data) {
+    private RealMatrix convertToRealMatrix(List<float[]> data) {
         int numRows = data.size();
         int numCols = data.get(0).length;
+        double[][] doubleData = new double[numRows][];
 
-        double[][] doubleData = new double[numRows][numCols];
         for (int i = 0; i < numRows; i++) {
+            doubleData[i] = new double[numCols];
             for (int j = 0; j < numCols; j++) {
                 doubleData[i][j] = data.get(i)[j];
             }
         }
+        return MatrixUtils.createRealMatrix(doubleData);
+    }
 
-        RealMatrix matrix = MatrixUtils.createRealMatrix(doubleData);
-        SingularValueDecomposition svd = new SingularValueDecomposition(matrix);
-        this.transformationMatrix = svd.getV().getSubMatrix(0, numCols - 1, 0, targetDimensions - 1).transpose();
+    private double[] toDoubleArray(float[] floatArray) {
+        double[] doubleArray = new double[floatArray.length];
+        for (int i = 0; i < floatArray.length; i++) {
+            doubleArray[i] = floatArray[i];
+        }
+        return doubleArray;
+    }
 
-        try (FileOutputStream fos = new FileOutputStream("PrincipalComponents");
+    private float[] toFloatArray(double[] doubleArray) {
+        float[] floatArray = new float[doubleArray.length];
+        for (int i = 0; i < doubleArray.length; i++) {
+            floatArray[i] = (float) doubleArray[i];
+        }
+        return floatArray;
+    }
+
+    private RealMatrix initializePrincipleComponents(int numRows, int numCols) {
+        RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
+        double[][] randomData = new double[numRows][numCols];
+
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                randomData[i][j] = randomDataGenerator.nextUniform(-0.01,0.01);
+            }
+        }
+        return MatrixUtils.createRealMatrix(randomData);
+    }
+
+    public void loadPrincipalComponents() {
+        try (FileInputStream fis = new FileInputStream("PrincipleComponents");
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+            this.principalComponents = (RealMatrix) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void savePrincipleComponents() {
+        try (FileOutputStream fos = new FileOutputStream("PrincipleComponents");
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(this.transformationMatrix);
+            oos.writeObject(principalComponents);
+            System.out.println(principalComponents.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

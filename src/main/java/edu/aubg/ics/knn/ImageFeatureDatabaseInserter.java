@@ -12,7 +12,7 @@ import static edu.aubg.ics.util.Constants.*;
 
 public class ImageFeatureDatabaseInserter {
     private ImageFeatureExtractor featureExtractor;
-    //private FeatureDimensionalityReducer featureDimensionalityReducer = new FeatureDimensionalityReducer(100);
+    private FeatureDimensionalityReducer featureDimensionalityReducer = new FeatureDimensionalityReducer(100, 0.001);
 
     public ImageFeatureDatabaseInserter(ImageFeatureExtractor featureExtractor) {
         this.featureExtractor = featureExtractor;
@@ -38,8 +38,8 @@ public class ImageFeatureDatabaseInserter {
 
                                     if (label != null) {
                                         float[] features = featureExtractor.extractFeatures(image);
-                                        //float[] reducedFeatures = featureDimensionalityReducer.reduce(features);
-                                        insertFeatureInDatabase(connection, tableName, fileName, label, features);
+                                        float[] reducedFeatures = featureDimensionalityReducer.reduceFeatureVector(features);
+                                        insertFeatureInDatabase(connection, tableName, fileName, label, reducedFeatures);
                                     }
                                     else {
                                         System.err.println("Label not found for file: " + fileName);
