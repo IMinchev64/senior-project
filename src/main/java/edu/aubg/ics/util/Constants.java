@@ -11,5 +11,7 @@ public class Constants {
     public static final String COCO_TRAIN_ANNOT_PATH = "../COCO/annotations/instances_train2017.json";
     public static final String COCO_VAL_ANNOT_PATH = "../COCO/annotations/instances_val2017.json";
     public static final String COCO_TRAIN_IMAGES_PATH = "../COCO/train2017/";
+    public static final String COCO_VAL_IMAGES_PATH = "../COCO/val2017/";
+
 
 }

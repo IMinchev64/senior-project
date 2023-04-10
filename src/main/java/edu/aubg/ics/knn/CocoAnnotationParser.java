@@ -77,7 +77,7 @@ public class CocoAnnotationParser {
                                 preparedStatement.setString(1, fileName);
                                 preparedStatement.setString(2, label);
                                 preparedStatement.addBatch();
-                                System.out.println("pair added to batch");
+                                System.out.println("Pair added to batch.");
                             }
                         }
                         jsonReader.endArray();
