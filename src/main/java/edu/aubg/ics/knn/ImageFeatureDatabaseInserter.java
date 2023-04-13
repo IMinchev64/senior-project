@@ -39,7 +39,9 @@ public class ImageFeatureDatabaseInserter {
                                     if (label != null) {
                                         float[] features = featureExtractor.extractFeatures(image);
                                         float[] reducedFeatures = featureDimensionalityReducer.reduceFeatureVector(features);
+                                        System.out.println("Inserting features for image: " + fileName);
                                         insertFeatureInDatabase(connection, tableName, fileName, label, reducedFeatures);
+                                        System.out.println("Features inserted successfully!");
                                     }
                                     else {
                                         System.err.println("Label not found for file: " + fileName);

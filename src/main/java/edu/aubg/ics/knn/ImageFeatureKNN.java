@@ -7,38 +7,33 @@ public class ImageFeatureKNN {
     public static String findNearestLabel(float[] features, int k, Connection connection) throws SQLException {
         PriorityQueue<DistanceLabelPair> nearestNeighbors = new PriorityQueue<>(Comparator.comparingDouble(DistanceLabelPair::getDistance).reversed());
 
-        String sql = "SELECT label, features FROM coco_val_features";
+        String featureCube = "CUBE(ARRAY[" + Arrays.toString(features).substring(1, Arrays.toString(features).length() - 1) + "])";
+
+        String sql = "SELECT label, vector_cube <-> " + featureCube + " AS distance FROM coco_train_features ORDER BY distance LIMIT " + k;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                Array dbArray = resultSet.getArray("features");
-                Float[] dbFloatObjArray = (Float[]) dbArray.getArray();
-                float[] dbFeatures = new float[dbFloatObjArray.length];
-
-                for (int i = 0; i < dbFloatObjArray.length; i++) {
-                    dbFeatures[i] = dbFloatObjArray[i];
-                }
-
                 String label = resultSet.getString("label");
-                double distance = euclideanDistance(features, dbFeatures);
+                double distance = resultSet.getDouble("distance");
 
-                if (nearestNeighbors.size() < k) {
-                    nearestNeighbors.offer(new DistanceLabelPair(distance, label));
-                } else if (distance < nearestNeighbors.peek().getDistance()) {
-                    nearestNeighbors.poll();
-                    nearestNeighbors.offer(new DistanceLabelPair(distance, label));
-                }
+                nearestNeighbors.offer(new DistanceLabelPair(distance, label));
             }
         }
 
-        Map<String, Integer> labelCount = new HashMap<>();
-        while (!nearestNeighbors.isEmpty()) {
-            DistanceLabelPair pair = nearestNeighbors.poll();
-            labelCount.put(pair.getLabel(), labelCount.getOrDefault(pair.getLabel(), 0) + 1);
+        System.out.println("Nearest Neighbors:");
+        for (DistanceLabelPair pair : nearestNeighbors) {
+            System.out.println("Label: " + pair.getLabel() + ", Distance: " + pair.getDistance());
         }
 
-        return Collections.max(labelCount.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+        Map<String, Double> labelWeightSum = new HashMap<>();
+        while (!nearestNeighbors.isEmpty()) {
+            DistanceLabelPair pair = nearestNeighbors.poll();
+            double weight = 1 / (pair.getDistance() + 1e-6); // Add a small constant to avoid division by zero
+            labelWeightSum.put(pair.getLabel(), labelWeightSum.getOrDefault(pair.getLabel(), 0.0) + weight);
+        }
+
+        return Collections.max(labelWeightSum.entrySet(), Comparator.comparingDouble(Map.Entry::getValue)).getKey();
     }
 
     private static double euclideanDistance(float[] a, float[] b) {

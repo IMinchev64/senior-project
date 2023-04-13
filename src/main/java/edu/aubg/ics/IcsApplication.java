@@ -29,58 +29,33 @@ public class IcsApplication {
 		int imageHeight = 224;
 		float[] normalizationFactors = {127.5f, 127.5f};
 
+		// Initialize the ImageFeatureExtractor
 		ImageFeatureExtractor extractor = new ImageFeatureExtractor(imageWidth, imageHeight, normalizationFactors);
 
-		String folderPath = COCO_TRAIN_IMAGES_PATH;
-		File folder = new File(folderPath);
-		File[] listOfFiles = folder.listFiles();
+		// Load the image
+		BufferedImage image = ImageIO.read(new File(COCO_TRAIN_IMAGES_PATH + "000000000034.jpg"));
 
-		int numImages = 24000;
-		int batchSize = 500;
-		int numBatches = numImages / batchSize;
+		// Extract feature vectors from the image
+		float[] featureVectors = extractor.extractFeatures(image);
 
-		FeatureDimensionalityReducer reducer = new FeatureDimensionalityReducer(100, 0.001);
+		// Initialize the FeatureDimensionalityReducer
+		int targetDimensions = 128;
+		double learningRate = 0.001;
+		FeatureDimensionalityReducer reducer = new FeatureDimensionalityReducer(targetDimensions, learningRate);
 
-//		for (int batch = 0; batch < numBatches; batch++) {
-//			List<float[]> batchFeatureVectors = new ArrayList<>();
-//
-//			for (int i = 0; i < batchSize; i++) {
-//				File file = listOfFiles[batch * batchSize + i];
-//				if (file.isFile() && isImageFile(file)) {
-//					try {
-//						BufferedImage image = ImageIO.read(file);
-//						float[] featureVector = extractor.extractFeatures(image);
-//						batchFeatureVectors.add(featureVector);
-//						System.out.println("Processed image: " + file.getName());
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//			System.out.println("Current batch is: " + (batch+1));
-//			System.out.println("Batches remaining: " + (numBatches-batch-1));
-//			reducer.partialFit(batchFeatureVectors);
-//		}
-//
-//		reducer.savePrincipleComponents();
+		// Reduce the dimensionality of the feature vectors
+		float[] reducedFeatureVectors = reducer.reduceFeatureVector(featureVectors);
 
-		BufferedImage image = ImageIO.read(new File(String.format("%s/%s", folderPath, "000000000009.jpg")));
-		float[] features = extractor.extractFeatures(image);
-		float[] reducedFeatures = reducer.reduceFeatureVector(features);
-		System.out.println("Feature vectors: " + Arrays.toString(features));
-		System.out.println("\n");
-		System.out.println("Reduced feature vectors: " + Arrays.toString(reducedFeatures));
+		// Initialize the KNN algorithm and connect to the database
+		int k = 5;
+		Connection connection = DriverManager.getConnection(POSTGRES_COCO_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
 
-	}
+		// Call the KNN algorithm to find the nearest label and print it
+		List<LabelPercentagePair> nearestLabel2 = ImageFeatureKNN2.findNearestLabel(reducedFeatureVectors, k, connection);
+		String nearestLabel = ImageFeatureKNN.findNearestLabel(reducedFeatureVectors, k, connection);
 
-	private static boolean isImageFile(File file) {
-		String[] imageExtensions = new String[]{"jpg", "jpeg", "png", "bmp"};
-		String fileName = file.getName().toLowerCase();
-		for (String extension : imageExtensions) {
-			if (fileName.endsWith(extension)) {
-				return true;
-			}
-		}
-		return false;
+		System.out.println("The nearest label is according to KNN1: " + nearestLabel);
+		System.out.println("The nearest label is according to KNN2: " + nearestLabel2.get(0).getLabel());
+		//System.out.println(Arrays.toString(reducedFeatureVectors));
 	}
 }
