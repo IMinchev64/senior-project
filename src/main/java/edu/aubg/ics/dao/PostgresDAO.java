@@ -10,8 +10,8 @@ public class PostgresDAO {
 
     private Connection connection;
 
-    public PostgresDAO() throws SQLException {
-        this.connection = DriverManager.getConnection(POSTGRES_ICS_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
+    public PostgresDAO(String url) throws SQLException {
+        this.connection = DriverManager.getConnection(url, POSTGRES_USERNAME, POSTGRES_PASSWORD);
     }
 
     public void close() throws SQLException {
@@ -22,7 +22,7 @@ public class PostgresDAO {
         return connection;
     }
 
-    public Connection newConnection() throws SQLException {
-        return DriverManager.getConnection(POSTGRES_ICS_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD);
+    public Connection newConnection(String url) throws SQLException {
+        return DriverManager.getConnection(url, POSTGRES_USERNAME, POSTGRES_PASSWORD);
     }
 }

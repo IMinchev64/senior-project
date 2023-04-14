@@ -16,14 +16,6 @@ import static edu.aubg.ics.util.Constants.*;
 
 public class CocoAnnotationParser {
 
-    public static void connectToDB() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(POSTGRES_COCO_CONNECTION, POSTGRES_USERNAME, POSTGRES_PASSWORD)) {
-            parseCocoAnnotation(COCO_VAL_ANNOT_PATH, connection);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static void parseCocoAnnotation(String filePath, Connection connection) throws IOException, SQLException {
         Gson gson = new Gson();
         Map<Integer, String> categoryMap = new HashMap<>();

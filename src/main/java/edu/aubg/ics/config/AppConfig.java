@@ -19,6 +19,8 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import java.sql.SQLException;
 
+import static edu.aubg.ics.util.Constants.POSTGRES_ICS_CONNECTION;
+
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
 
@@ -33,7 +35,7 @@ public class AppConfig implements WebMvcConfigurer {
 
     @Bean
     public PostgresDAO postgresDAO() throws SQLException {
-        return new PostgresDAO();
+        return new PostgresDAO(POSTGRES_ICS_CONNECTION);
     }
 
     @Bean

@@ -2,18 +2,18 @@ package edu.aubg.ics.controller;
 
 import edu.aubg.ics.dto.ImageData;
 import edu.aubg.ics.model.ImageModel;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.IOException;
-import java.util.List;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.List;
 
 import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
 
@@ -36,14 +36,19 @@ public class ImageController {
     @PostMapping("/")
     public String submitImage(@RequestParam("url") String url,
                               @RequestParam(required = false, defaultValue = "false") boolean noCache,
-                              Model model) {
+                              Model model) throws NoSuchAlgorithmException {
         try {
             imageModel.processImage(url, noCache);
             String checksum = calculateChecksum(url);
-            return "redirect:/images/" + checksum;
+            return String.format("redirect:/images/%s", checksum);
+        } catch (PSQLException e) {
+            e.printStackTrace();
+            String checksum = calculateChecksum(url);
+            return String.format("redirect:/images/%s", checksum);
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("imageUrl", url);
+
             return "submission";
         }
     }
@@ -59,6 +64,12 @@ public class ImageController {
     public String getImageData(@PathVariable String checksum, Model model) {
         try {
             ImageData imageData = imageModel.getImageData(checksum);
+
+            if (imageData == null) {
+                model.addAttribute("error", "Image not found");
+                return "gallery";
+            }
+
             model.addAttribute("imageData", imageData);
             return "imageDetails";
         } catch (SQLException e) {

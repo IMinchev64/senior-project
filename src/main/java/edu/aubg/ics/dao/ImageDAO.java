@@ -61,13 +61,14 @@ public class ImageDAO {
             if (resultSet.next()) {
                 String url = resultSet.getString("url");
                 String uploadedAt = resultSet.getString("uploaded_at");
+                String labelKNN = resultSet.getString("knn_label");
                 int width = resultSet.getInt("width");
                 int height = resultSet.getInt("height");
                 int id = resultSet.getInt("id");
 
                 Map<String, Double> tagMap = getTagMap(id);
 
-                return new ImageData(checksum, url, uploadedAt, width, height, tagMap);
+                return new ImageData(checksum, url, uploadedAt, width, height, tagMap, labelKNN);
             }
 
         } finally {
@@ -96,13 +97,14 @@ public class ImageDAO {
                 String checksum = resultSet.getString("checksum");
                 String url = resultSet.getString("url");
                 String uploadedAt = resultSet.getString("uploaded_at");
+                String labelKNN = resultSet.getString("knn_label");
                 int width = resultSet.getInt("width");
                 int height = resultSet.getInt("height");
                 int id = resultSet.getInt("id");
 
                 Map<String, Double> tagMap = getTagMap(id);
 
-                ImageData imageData = new ImageData(checksum, url, uploadedAt, width, height, tagMap);
+                ImageData imageData = new ImageData(checksum, url, uploadedAt, width, height, tagMap, labelKNN);
                 images.add(imageData);
             }
         } finally {
@@ -136,13 +138,14 @@ public class ImageDAO {
     }
 
     private void insertImage(ImageData imageData) throws SQLException{
-        String sql = "INSERT INTO images (url, width, height, checksum) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO images (url, width, height, checksum, knn_label) VALUES (?, ?, ?, ?, ?)";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, imageData.getUrl());
                 preparedStatement.setInt(2, imageData.getWidth());
                 preparedStatement.setInt(3, imageData.getHeight());
                 preparedStatement.setString(4, imageData.getChecksum());
+                preparedStatement.setString(5, imageData.getLabelKNN());
                 preparedStatement.executeUpdate();
             }
     }

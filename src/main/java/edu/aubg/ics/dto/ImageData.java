@@ -2,6 +2,7 @@ package edu.aubg.ics.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.aubg.ics.knn.ImageAnalyzer;
 import edu.aubg.ics.util.ChecksumCalculator;
 import edu.aubg.ics.util.ImageDimensions;
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import org.json.JSONArray;
 import java.awt.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.Map;
 
 import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
@@ -28,24 +30,27 @@ public class ImageData {
     private String uploadedAt;
     @JsonProperty("tags")
     private Map<String, Double> tagMap;
+    private String labelKNN;
 
     public ImageData() {}
 
-    public ImageData(String url, JSONArray tags) throws NoSuchAlgorithmException, IOException {
+    public ImageData(String url, JSONArray tags) throws NoSuchAlgorithmException, IOException, SQLException {
         this.url = url;
         this.tags = tags;
         this.checksum = calculateChecksum(url);
+        this.labelKNN = new ImageAnalyzer().analyzeImage(url);
 
         setDimensions();
     }
 
-    public ImageData(String checksum, String url, String uploadedAt, int width, int height, Map<String, Double> tagMap) {
+    public ImageData(String checksum, String url, String uploadedAt, int width, int height, Map<String, Double> tagMap, String labelKNN) {
         this.checksum = checksum;
         this.url = url;
         this.uploadedAt = uploadedAt;
         this.width = width;
         this.height = height;
         this.tagMap = tagMap;
+        this.labelKNN = labelKNN;
     }
 
     public String getUrl() {
@@ -74,6 +79,10 @@ public class ImageData {
 
     public Map getTagMap(){
         return tagMap;
+    }
+
+    public String getLabelKNN() {
+        return labelKNN;
     }
 
     private void setDimensions() throws IOException {

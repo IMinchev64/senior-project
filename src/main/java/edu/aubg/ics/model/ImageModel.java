@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
+import static edu.aubg.ics.util.Constants.POSTGRES_ICS_CONNECTION;
 
 @Service
 public class ImageModel {
@@ -39,41 +40,42 @@ public class ImageModel {
         String checksum = calculateChecksum(imageURL);
         Connection connection;
 
-        connection = postgresDAO.newConnection();
+        connection = postgresDAO.newConnection(POSTGRES_ICS_CONNECTION);
         imageDAO.setConnection(connection);
 
         if(!noCache && checkExisting(checksum)) {
             System.out.println("Image already exists");
-            return;
         }
+        else {
+            try {
 
-        try {
+                String jsonResponse = imaggaConnector.connect(imageURL);
+                JSONArray tags = responseParser.jsonParser(jsonResponse);
+                imageData = new ImageData(imageURL, tags);
 
-            String jsonResponse = imaggaConnector.connect(imageURL);
-            JSONArray tags = responseParser.jsonParser(jsonResponse);
-            imageData = new ImageData(imageURL, tags);
-
-            if (!noCache) {
-                insertImage();
+                if (!noCache) {
+                    insertImage();
+                }
+                else {
+                    updateImage();
+                }
+                System.out.println("Image inserted");
+                System.out.println("Operation successfull!");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Failed to connect to Imagga API");
             }
-            else {
-                updateImage();
-            }
-            System.out.println("Image inserted");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Failed to connect to Imagga API");
-        } finally {
+
             postgresDAO.close();
-            System.out.println("Operation successfull!");
         }
+
 
     }
 
     public ImageData getImageData(String checksum) throws SQLException {
         Connection connection;
         try {
-            connection = postgresDAO.newConnection();
+            connection = postgresDAO.newConnection(POSTGRES_ICS_CONNECTION);
             imageDAO.setConnection(connection);
 
             imageData = fetchImage(checksum);
@@ -88,7 +90,7 @@ public class ImageModel {
         Connection connection;
 
         try {
-            connection = postgresDAO.newConnection();
+            connection = postgresDAO.newConnection(POSTGRES_ICS_CONNECTION);
             imageDAO.setConnection(connection);
 
             List<ImageData> images = imageDAO.getAllImages();
