@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Image Details</title>
-    <link th:href="@{/styles/submission.css}" rel="stylesheet" />
+    <link th:href="@{/styles/imageDetails.css}" rel="stylesheet" />
 </head>
 <body>
 <header>
@@ -20,20 +20,21 @@
         <div class="image-info">
             <img th:src="${imageData.getUrl()}" alt="Image">
             <ul>
-                <li>URL: [[${imageData.getUrl()}]]</li>
-                <li>Width: [[${imageData.getWidth()}]]px</li>
-                <li>Height: [[${imageData.getHeight()}]]px</li>
-                <li>Uploaded at: [[${imageData.getUploadedAt()}]]</li>
-                <li>KNN Label: [[${imageData.getLabelKNN()}]]</li>
+                <li>Analyzed on: [[${imageData.getUploadedAt()}]]</li>
             </ul>
         </div>
-        <h2>Tags</h2>
+        <h2>KNN Tags</h2>
         <div class="tags">
             <ul>
-                <li th:each="tag : ${imageData.getTagMap()}">
-                    <span th:text="${tag.key}"></span>:
-                    <span th:text="${#numbers.formatDecimal(
-                    tag.value, 2, 2)}"></span>%
+                <li>[[${imageData.getLabelKNN()}]]</li>
+            </ul>
+        </div>
+        <h2>Imagga Tags</h2>
+        <div class="tags">
+            <ul>
+                <li th:each="tag : ${imageData.getTagMap()}" class="tag-item">
+                    <span th:text="${tag.key}"></span>
+                    <span class="confidence" th:text="${#numbers.formatDecimal(tag.value, 2, 2)}"></span>
                 </li>
             </ul>
         </div>

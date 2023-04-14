@@ -119,6 +119,75 @@ public class ImageDAO {
         return images;
     }
 
+    public List<ImageData> getImagesByPage(int page, int pageSize) throws SQLException {
+        List<ImageData> images = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            String sql = "SELECT * FROM images ORDER BY id OFFSET ? LIMIT ?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, (page - 1) * pageSize);
+            preparedStatement.setInt(2, pageSize);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String checksum = resultSet.getString("checksum");
+                String url = resultSet.getString("url");
+                String uploadedAt = resultSet.getString("uploaded_at");
+                String labelKNN = resultSet.getString("knn_label");
+                int width = resultSet.getInt("width");
+                int height = resultSet.getInt("height");
+                int id = resultSet.getInt("id");
+
+                Map<String, Double> tagMap = getTagMap(id);
+
+                ImageData imageData = new ImageData(checksum, url, uploadedAt, width, height, tagMap, labelKNN);
+                images.add(imageData);
+            }
+        } finally {
+            try {
+                resultSet.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                preparedStatement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return images;
+    }
+
+    public int getImageCount() throws SQLException {
+        int count = 0;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            String sql = "SELECT COUNT(*) FROM images";
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } finally {
+            try {
+                resultSet.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                preparedStatement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return count;
+    }
+
     private Map<String, Double> getTagMap(int id) throws SQLException {
         PreparedStatement preparedStatement = null;
         Map<String, Double> tagMap = new HashMap<>();

@@ -73,3 +73,49 @@ nav li a:hover {
     transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
 }
+
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+
+.pagination ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+
+.pagination li {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+
+.pagination li a {
+    display: inline-block;
+    padding: 8px 12px;
+    text-decoration: none;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+}
+
+
+.pagination li.active a {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #ffffff;
+}
+
+
+.pagination li a:hover {
+    background-color: #dee2e6;
+}
+
+.pagination li.disabled a {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+}

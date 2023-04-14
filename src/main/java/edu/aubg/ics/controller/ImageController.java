@@ -54,9 +54,13 @@ public class ImageController {
     }
 
     @GetMapping("/images")
-    public String getImageGallery(Model model) throws SQLException {
-        List<ImageData> images = imageModel.getAllImages();
+    public String getImageGallery(@RequestParam(value="pages", defaultValue = "1") int page, Model model) throws SQLException {
+        int pageSize = 2;
+        List<ImageData> images = imageModel.getImagesByPage(page, pageSize);
+        int totalPages = imageModel.getTotalPages(pageSize);
         model.addAttribute("images", images);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "gallery";
     }
 

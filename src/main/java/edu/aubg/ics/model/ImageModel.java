@@ -100,6 +100,34 @@ public class ImageModel {
         }
     }
 
+    public List<ImageData> getImagesByPage(int page, int pageSize) throws SQLException {
+        Connection connection;
+
+        try {
+            connection = postgresDAO.newConnection(POSTGRES_ICS_CONNECTION);
+            imageDAO.setConnection(connection);
+
+            List<ImageData> images = imageDAO.getImagesByPage(page, pageSize);
+            return images;
+        } finally {
+            postgresDAO.close();
+        }
+    }
+
+    public int getTotalPages(int pageSize) throws SQLException {
+        Connection connection;
+
+        try {
+            connection = postgresDAO.newConnection(POSTGRES_ICS_CONNECTION);
+            imageDAO.setConnection(connection);
+
+            int totalCount = imageDAO.getImageCount();
+            return (int) Math.ceil((double) totalCount / pageSize);
+        } finally {
+            postgresDAO.close();
+        }
+    }
+
     private void insertImage() throws SQLException {
         imageDAO.insertToDatabase(imageData);
     }
