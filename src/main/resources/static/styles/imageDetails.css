@@ -48,11 +48,22 @@ main {
     margin: 50px;
 }
 
+.image-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
 .image-info img {
     max-width: 100%;
+    max-height: 500px;
+    width: auto;
     height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
     margin-bottom: 20px;
-    border-radius: 5px;
 }
 
 .image-info ul {
@@ -67,6 +78,10 @@ main {
 
 .image-info ul li {
     margin-bottom: 10px;
+}
+
+.tags {
+    margin-bottom: 20px;
 }
 
 .tags h2 {
@@ -96,9 +111,9 @@ main {
     visibility: hidden;
     background-color: white;
     color: black;
-    padding: 2px 5px;
-    border-radius: 3px;
-    font-size: 12px;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-size: 14px;
     left: 100%;
     top: 50%;
     transform: translateY(-50%);
@@ -108,4 +123,50 @@ main {
 
 .tags ul li:hover .confidence {
     visibility: visible;
+}
+
+.image-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.image-details.portrait {
+    flex-direction: row;
+}
+
+.image-details.landscape .image-info {
+    margin-bottom: 20px;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-container ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.info-container ul li {
+    float: left;
+    margin-right: 20px;
+}
+
+@media (min-aspect-ratio: 1/1) {
+    .image-info {
+        flex-direction: row;
+    }
+
+    .image-info img {
+        margin-bottom: 0;
+        margin-right: 20px; /* Add space to the right of the image in portrait view */
+    }
+
+    .image-info ul {
+        width: auto; /* Reset the width to auto in landscape view */
+        margin-left: 20px; /* Add space to the left of the texts in portrait view */
+    }
 }

@@ -11,6 +11,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static edu.aubg.ics.util.ChecksumCalculator.calculateChecksum;
@@ -46,11 +48,11 @@ public class ImageData {
     public ImageData(String checksum, String url, String uploadedAt, int width, int height, Map<String, Double> tagMap, String labelKNN) {
         this.checksum = checksum;
         this.url = url;
-        this.uploadedAt = uploadedAt;
         this.width = width;
         this.height = height;
         this.tagMap = tagMap;
         this.labelKNN = labelKNN;
+        setUploadedAt(uploadedAt);
     }
 
     public String getUrl() {
@@ -89,5 +91,13 @@ public class ImageData {
         ImageDimensions imageDimensions = new ImageDimensions(this.url);
         this.width = imageDimensions.getWidth();
         this.height = imageDimensions.getHeight();
+    }
+
+    private void setUploadedAt(String uploadedAt) {
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n");
+        LocalDateTime parsedDate = LocalDateTime.parse(uploadedAt, inputFormatter);
+
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        this.uploadedAt = parsedDate.format(outputFormatter);
     }
 }

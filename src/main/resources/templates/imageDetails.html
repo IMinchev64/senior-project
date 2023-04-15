@@ -1,44 +1,108 @@
 <!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <title>Image Details</title>
+
     <link th:href="@{/styles/imageDetails.css}" rel="stylesheet" />
+
 </head>
+
 <body>
+
 <header>
+
     <nav>
+
         <ul>
+
             <li><a href="/">Submit Image</a></li>
+
             <li><a href="/images">Gallery</a></li>
+
         </ul>
+
     </nav>
+
 </header>
+
 <main>
+
     <div class="container">
+
         <h1>Image Details</h1>
-        <div class="image-info">
-            <img th:src="${imageData.getUrl()}" alt="Image">
-            <ul>
-                <li>Analyzed on: [[${imageData.getUploadedAt()}]]</li>
-            </ul>
+
+        <div class="image-details">
+
+            <div class="image-info">
+
+                <img id="image" th:src="${imageData.getUrl()}" alt="Image">
+
+            </div>
+
+            <div class="info-container">
+
+                <h2>KNN Tags</h2>
+
+                <div class="tags">
+
+                    <ul>
+
+                        <li>[[${imageData.getLabelKNN()}]]</li>
+
+                    </ul>
+
+                </div>
+
+                <h2>Imagga Tags</h2>
+
+                <div class="tags">
+
+                    <ul>
+
+                        <li th:each="tag : ${imageData.getTagMap()}">
+
+                            <span th:text="${tag.key}"></span>
+                            <span class="confidence" th:text="${#numbers.formatDecimal(
+                            tag.value, 2, 2)}">%</span>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                <ul>
+
+                    <li>Analyzed on: [[${imageData.getUploadedAt()}]]</li>
+
+                </ul>
+
+            </div>
+
         </div>
-        <h2>KNN Tags</h2>
-        <div class="tags">
-            <ul>
-                <li>[[${imageData.getLabelKNN()}]]</li>
-            </ul>
-        </div>
-        <h2>Imagga Tags</h2>
-        <div class="tags">
-            <ul>
-                <li th:each="tag : ${imageData.getTagMap()}" class="tag-item">
-                    <span th:text="${tag.key}"></span>
-                    <span class="confidence" th:text="${#numbers.formatDecimal(tag.value, 2, 2)}"></span>
-                </li>
-            </ul>
-        </div>
+
     </div>
+
 </main>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const image = document.getElementById("image");
+        const container = document.querySelector(".image-details");
+        if (image.naturalWidth > image.naturalHeight) {
+            container.classList.add("landscape");
+        } else {
+            container.classList.add("portrait");
+        }
+    });
+
+</script>
+
 </body>
+
 </html>
