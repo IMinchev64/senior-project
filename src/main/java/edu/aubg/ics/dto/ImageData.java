@@ -2,6 +2,9 @@ package edu.aubg.ics.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import edu.aubg.ics.aop.PerformanceModule;
 import edu.aubg.ics.knn.ImageAnalyzer;
 import edu.aubg.ics.util.ChecksumCalculator;
 import edu.aubg.ics.util.ImageDimensions;
@@ -40,7 +43,10 @@ public class ImageData {
         this.url = url;
         this.tags = tags;
         this.checksum = calculateChecksum(url);
-        this.labelKNN = new ImageAnalyzer().analyzeImage(url);
+
+        Injector injector = Guice.createInjector(new PerformanceModule());
+        ImageAnalyzer imageAnalyzer = injector.getInstance(ImageAnalyzer.class);
+        this.labelKNN = imageAnalyzer.analyzeImage(url);
 
         setDimensions();
     }

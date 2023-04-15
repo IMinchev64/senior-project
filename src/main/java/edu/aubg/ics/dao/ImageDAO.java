@@ -25,6 +25,11 @@ public class ImageDAO {
         insertImageToTags(imageData);
     }
 
+    public void updateDatabase(ImageData imageData) throws SQLException {
+        insertImage(imageData);
+        insertImageToTags(imageData);
+    }
+
     public boolean imageExists(String checksum) {
         try {
             String checkQuery = "SELECT COUNT(*) FROM images WHERE checksum = ?";
@@ -46,7 +51,7 @@ public class ImageDAO {
                 deleteImageTagsByImageId(imageId);
                 deleteImageById(imageId);
             }
-            insertToDatabase(imageData);
+            updateDatabase(imageData);
     }
 
     public ImageData fetchImage(String checksum) throws SQLException {

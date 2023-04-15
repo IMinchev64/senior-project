@@ -134,8 +134,18 @@ main {
     flex-direction: row;
 }
 
+.image-details.portrait .image-info {
+    margin-right: 20px;
+}
+
 .image-details.landscape .image-info {
+    justify-content: center;
     margin-bottom: 20px;
+    width: 100%;
+}
+
+.image-details.landscape .info-container {
+    align-self: flex-start;
 }
 
 .info-container {
@@ -155,18 +165,3 @@ main {
     margin-right: 20px;
 }
 
-@media (min-aspect-ratio: 1/1) {
-    .image-info {
-        flex-direction: row;
-    }
-
-    .image-info img {
-        margin-bottom: 0;
-        margin-right: 20px; /* Add space to the right of the image in portrait view */
-    }
-
-    .image-info ul {
-        width: auto; /* Reset the width to auto in landscape view */
-        margin-left: 20px; /* Add space to the left of the texts in portrait view */
-    }
-}

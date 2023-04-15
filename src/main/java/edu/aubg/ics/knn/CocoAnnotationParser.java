@@ -1,18 +1,16 @@
 package edu.aubg.ics.knn;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static edu.aubg.ics.util.Constants.*;
 
 public class CocoAnnotationParser {
 

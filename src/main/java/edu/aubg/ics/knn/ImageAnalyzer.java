@@ -1,5 +1,6 @@
 package edu.aubg.ics.knn;
 
+import edu.aubg.ics.aop.MeasurePerformance;
 import edu.aubg.ics.dao.PostgresDAO;
 
 import javax.imageio.ImageIO;
@@ -22,6 +23,7 @@ public class ImageAnalyzer {
     private BufferedImage image;
     private Connection connection;
 
+    @MeasurePerformance
     public String analyzeImage(String imageUrl) throws IOException, SQLException {
         this.connection = new PostgresDAO(POSTGRES_COCO_CONNECTION).getConnection();
         setImage(imageUrl);

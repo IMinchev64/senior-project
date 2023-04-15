@@ -2,14 +2,12 @@ package edu.aubg.ics.controller;
 
 import edu.aubg.ics.dto.ImageData;
 import edu.aubg.ics.model.ImageModel;
+import edu.aubg.ics.util.InputValidator;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -34,28 +32,36 @@ public class ImageController {
     }
 
     @PostMapping("/")
-    public String submitImage(@RequestParam("url") String url,
+    public String submitImage(@ModelAttribute("imageData") ImageData imageData,
+                              @RequestParam("url") String url,
                               @RequestParam(required = false, defaultValue = "false") boolean noCache,
                               Model model) throws NoSuchAlgorithmException {
-        try {
-            imageModel.processImage(url, noCache);
-            String checksum = calculateChecksum(url);
-            return String.format("redirect:/images/%s", checksum);
-        } catch (PSQLException e) {
-            e.printStackTrace();
-            String checksum = calculateChecksum(url);
-            return String.format("redirect:/images/%s", checksum);
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("imageUrl", url);
+        if (InputValidator.isValidImageUrl(url)) {
+            try {
+                imageModel.processImage(url, noCache);
+                String checksum = calculateChecksum(url);
+                return String.format("redirect:/images/%s", checksum);
+            } catch (PSQLException e) {
+                e.printStackTrace();
+                String checksum = calculateChecksum(url);
+                return String.format("redirect:/images/%s", checksum);
+            } catch (Exception e) {
+                model.addAttribute("error", e.getMessage());
+                model.addAttribute("imageUrl", url);
 
+                return "submission";
+            }
+        }
+        else {
+            model.addAttribute("error", "Invalid image URL");
+            model.addAttribute("imageUrl", url);
             return "submission";
         }
     }
 
     @GetMapping("/images")
     public String getImageGallery(@RequestParam(value="pages", defaultValue = "1") int page, Model model) throws SQLException {
-        int pageSize = 2;
+        int pageSize = 10;
         List<ImageData> images = imageModel.getImagesByPage(page, pageSize);
         int totalPages = imageModel.getTotalPages(pageSize);
         model.addAttribute("images", images);
